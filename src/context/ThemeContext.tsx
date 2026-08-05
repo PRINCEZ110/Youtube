@@ -24,20 +24,15 @@ function getStoredTheme(): Theme | null {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light')
-  const [mounted, setMounted] = useState(false)
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === 'undefined') return 'light'
+    return getStoredTheme() ?? getSystemTheme()
+  })
 
   useEffect(() => {
-    const stored = getStoredTheme()
-    setTheme(stored ?? getSystemTheme())
-    setMounted(true)
-  }, [])
-
-  useEffect(() => {
-    if (!mounted) return
     localStorage.setItem('theme', theme)
     document.documentElement.classList.toggle('dark', theme === 'dark')
-  }, [theme, mounted])
+  }, [theme])
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
