@@ -2,9 +2,15 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 
-const WatchLaterContext = createContext<any>(null)
+interface WatchLaterContextValue {
+  saved: string[]
+  add: (id: string) => void
+  remove: (id: string) => void
+}
 
-function load() {
+const WatchLaterContext = createContext<WatchLaterContextValue | undefined>(undefined)
+
+function load(): string[] {
   if (typeof window === 'undefined') return []
   try {
     const data = localStorage.getItem('watchLater')
@@ -15,11 +21,7 @@ function load() {
 }
 
 export function WatchLaterProvider({ children }: { children: React.ReactNode }) {
-  const [saved, setSaved] = useState<string[]>([])
-
-  useEffect(() => {
-    setSaved(load())
-  }, [])
+  const [saved, setSaved] = useState<string[]>(() => load())
 
   useEffect(() => {
     localStorage.setItem('watchLater', JSON.stringify(saved))
@@ -30,7 +32,7 @@ export function WatchLaterProvider({ children }: { children: React.ReactNode }) 
   }
 
   function remove(id: string) {
-    setSaved(saved.filter((v: string) => v !== id))
+    setSaved(saved.filter((v) => v !== id))
   }
 
   return (
@@ -41,5 +43,9 @@ export function WatchLaterProvider({ children }: { children: React.ReactNode }) 
 }
 
 export function useWatchLater() {
-  return useContext(WatchLaterContext)
+  const context = useContext(WatchLaterContext)
+  if (!context) {
+    throw new Error('useWatchLater must be used within a WatchLaterProvider')
+  }
+  return context
 }
