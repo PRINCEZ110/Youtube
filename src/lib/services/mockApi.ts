@@ -1,16 +1,7 @@
 import { mockVideos, type Video } from '@/lib/data/mockVideos'
 import { mockComments, type Comment } from '@/lib/data/mockComments'
+import { getChannel as getMockChannel, type Channel } from '@/lib/data/mockChannels'
 import { PAGINATION } from '@/lib/constants'
-
-export interface Channel {
-  id: string
-  name: string
-  avatar: string
-  subscriberCount: number
-  videoCount: number
-  description: string
-  joinedDate: Date
-}
 
 export interface FetchVideosParams {
   page: number
@@ -30,36 +21,6 @@ const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 const avatarUrl = (seed: number) => `https://picsum.photos/seed/${seed}/48/48`
 
 const userComments: Comment[] = []
-
-function buildChannels(): Channel[] {
-  const byChannel = new Map<string, Video[]>()
-  for (const video of mockVideos) {
-    const list = byChannel.get(video.channelId)
-    if (list) {
-      list.push(video)
-    } else {
-      byChannel.set(video.channelId, [video])
-    }
-  }
-  return Array.from(byChannel.entries()).map(([id, videos]) => {
-    const first = videos[0]
-    const totalViews = videos.reduce((sum, video) => sum + video.views, 0)
-    return {
-      id,
-      name: first.channelName,
-      avatar: first.channelAvatar,
-      subscriberCount: Math.round(totalViews / 8),
-      videoCount: videos.length,
-      description: `The official channel of ${first.channelName}.`,
-      joinedDate: videos.reduce(
-        (earliest, video) => (video.uploadedAt < earliest ? video.uploadedAt : earliest),
-        first.uploadedAt
-      ),
-    }
-  })
-}
-
-export const mockChannels: Channel[] = buildChannels()
 
 export async function fetchVideos({
   page,
@@ -128,7 +89,7 @@ export async function getTrendingSearches(): Promise<string[]> {
 
 export async function getChannel(id: string): Promise<Channel | undefined> {
   await delay(300)
-  return mockChannels.find((channel) => channel.id === id)
+  return getMockChannel(id)
 }
 
 export async function getChannelVideos(id: string): Promise<Video[]> {
@@ -148,11 +109,12 @@ export async function addComment(videoId: string, text: string): Promise<Comment
   const comment: Comment = {
     id: `c-${Date.now()}`,
     videoId,
-    channelName: 'You',
-    channelAvatar: avatarUrl(999),
+    authorName: 'You',
+    authorAvatar: avatarUrl(999),
     text,
     likes: 0,
     timestamp: new Date(),
+    replies: [],
   }
   userComments.unshift(comment)
   return comment
