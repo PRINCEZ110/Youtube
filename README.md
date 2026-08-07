@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# YouTube Clone
+
+A YouTube-inspired video streaming frontend built with **Next.js 16** (App Router), **React 19**, **TypeScript**, **Tailwind CSS v4**, and **Redux Toolkit**. Uses mock data to simulate the YouTube experience — home feed, search, video pages, related videos, and a watch-later list.
+
+## Tech Stack
+
+- [Next.js 16](https://nextjs.org) (App Router + Turbopack)
+- [React 19](https://react.dev)
+- [TypeScript](https://www.typescriptlang.org)
+- [Tailwind CSS v4](https://tailwindcss.com) (CSS-first config)
+- [Redux Toolkit](https://redux-toolkit.js.org) + React Redux
+- [lucide-react](https://lucide.dev) icons
+- [date-fns](https://date-fns.org)
+
+## Features
+
+**Implemented**
+
+- Home feed with a responsive video grid (1/2/3/4 columns across breakpoints)
+- Category filter chips + infinite-style "Load more" pagination
+- Full-text search page (`/search?q=...`)
+- Watch page (`/watch/[id]`) with player, video info, related videos
+- Watch Later (persisted to `localStorage` via context)
+- Dark / light theme (system-preference aware, persisted)
+- Responsive layout: top nav, collapsible sidebar, mobile drawer
+- Channel avatars with colored-initial fallback
+
+**In progress / planned**
+
+- Comments section on the watch page
+- Engagement actions (like / dislike / subscribe)
+- Real video playback
+- Watch history tracking + history page
+- Library (Watch Later) page
+- Sidebar navigation links (Home / History / Library)
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command            | Description                    |
+| ------------------ | ------------------------------ |
+| `npm run dev`      | Start the dev server           |
+| `npm run build`    | Create a production build      |
+| `npm run start`    | Start the production server    |
+| `npm run lint`     | Run ESLint                     |
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/                    # App Router pages
+│   ├── layout.tsx          # Root layout (providers wiring)
+│   ├── page.tsx            # Home feed
+│   ├── search/page.tsx     # Search page
+│   └── watch/[id]/         # Watch page + client component
+├── components/
+│   ├── home/               # Home-only components
+│   ├── layout/             # TopNav, Sidebar, MobileNav, providers
+│   ├── search/             # SearchInput, SearchResults
+│   ├── ui/                 # Reusable atoms (ChannelAvatar, WatchLaterButton...)
+│   └── video/              # VideoCard, VideoGrid, VideoPlayer, VideoInfo...
+├── context/                # Theme, WatchLater, History providers
+├── lib/
+│   ├── data/               # Mock videos + categories
+│   ├── constants.ts
+│   └── utils.ts            # formatViews, formatDuration, timeAgo
+└── store/
+    ├── slices/             # videoSlice, searchSlice, uiSlice
+    ├── hooks.ts            # Typed useAppDispatch / useAppSelector
+    └── index.ts
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Images are mocked with `https://picsum.photos` (allow-listed in `next.config.ts`).
+- Data is mock-only; no backend or API key required.
