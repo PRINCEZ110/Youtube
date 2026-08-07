@@ -9,6 +9,28 @@ import type { Video } from '@/lib/data/mockVideos'
 
 export default function VideoInfo({ video }: { video: Video }) {
   const [expanded, setExpanded] = useState(false)
+  const [liked, setLiked] = useState<boolean | null>(null)
+  const [likes, setLikes] = useState(1200)
+  const [subscribed, setSubscribed] = useState(false)
+
+  function toggleLike() {
+    if (liked === true) {
+      setLiked(null)
+      setLikes((n) => n - 1)
+    } else {
+      setLiked(true)
+      setLikes((n) => n + 1)
+    }
+  }
+
+  function toggleDislike() {
+    if (liked === false) {
+      setLiked(null)
+    } else {
+      if (liked === true) setLikes((n) => n - 1)
+      setLiked(false)
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4 py-4">
@@ -26,17 +48,34 @@ export default function VideoInfo({ video }: { video: Video }) {
             {formatViews(video.views)} views · {timeAgo(video.uploadedAt)}
           </p>
         </div>
-        <button className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300">
-          Subscribe
+        <button
+          onClick={() => setSubscribed((s) => !s)}
+          className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        >
+          {subscribed ? 'Subscribed' : 'Subscribe'}
         </button>
         <WatchLaterButton videoId={video.id} />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <button className="flex items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-800 transition-colors hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800">
-          <ThumbsUp size={18} /> 1.2K
+        <button
+          onClick={toggleLike}
+          aria-pressed={liked === true}
+          className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-200 dark:hover:bg-zinc-800 ${
+            liked === true
+              ? 'bg-zinc-100 text-blue-600 dark:bg-zinc-900 dark:text-blue-400'
+              : 'bg-zinc-100 text-zinc-800 dark:bg-zinc-900 dark:text-zinc-200'
+          }`}
+        >
+          <ThumbsUp size={18} /> {formatViews(likes)}
         </button>
-        <button className="flex items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-800 transition-colors hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800">
+        <button
+          onClick={toggleDislike}
+          aria-pressed={liked === false}
+          className={`rounded-full bg-zinc-100 p-2 text-zinc-800 transition-colors hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 ${
+            liked === false ? 'text-blue-600 dark:text-blue-400' : ''
+          }`}
+        >
           <ThumbsDown size={18} />
         </button>
         <button className="flex items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-800 transition-colors hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800">

@@ -5,14 +5,23 @@ import Sidebar from '@/components/layout/Sidebar'
 import MobileNav from '@/components/layout/MobileNav'
 import VideoCard from '@/components/video/VideoCard'
 import EmptyState from '@/components/ui/EmptyState'
-import { History } from 'lucide-react'
-import { useHistory } from '@/context/HistoryContext'
+import { Heart } from 'lucide-react'
 import { mockVideos } from '@/lib/data/mockVideos'
 
-export default function HistoryPage() {
-  const { history, clearHistory } = useHistory()
+function load(): string[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const data = localStorage.getItem('liked')
+    return data ? JSON.parse(data) : []
+  } catch {
+    return []
+  }
+}
 
-  const videos = history
+export default function LikedPage() {
+  const liked = load()
+
+  const videos = liked
     .map((id) => mockVideos.find((v) => v.id === id))
     .filter((v) => v !== undefined)
 
@@ -23,22 +32,12 @@ export default function HistoryPage() {
       <div className="flex">
         <Sidebar />
         <main className="min-w-0 flex-1 px-4 py-6 sm:px-6">
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              History
-            </h1>
-            {videos.length > 0 && (
-              <button
-                onClick={clearHistory}
-                className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
-              >
-                Clear history
-              </button>
-            )}
-          </div>
+          <h1 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+            Liked videos
+          </h1>
 
           {videos.length === 0 ? (
-            <EmptyState message="No watch history yet." icon={History} />
+            <EmptyState message="No liked videos yet." icon={Heart} />
           ) : (
             <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {videos.map((video) => (

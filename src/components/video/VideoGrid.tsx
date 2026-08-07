@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { fetchVideos } from '@/store/slices/videoSlice'
 import { mockVideos } from '@/lib/data/mockVideos'
 import VideoCard from '@/components/video/VideoCard'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import VideoCardSkeleton from '@/components/video/VideoCardSkeleton'
 
 export default function VideoGrid() {
   const dispatch = useAppDispatch()
@@ -23,8 +23,10 @@ export default function VideoGrid() {
 
   if (loading && videos.length === 0) {
     return (
-      <div className="flex justify-center py-24">
-        <LoadingSpinner size={40} />
+      <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {Array.from({ length: 8 }, (_, i) => (
+          <VideoCardSkeleton key={i} />
+        ))}
       </div>
     )
   }
