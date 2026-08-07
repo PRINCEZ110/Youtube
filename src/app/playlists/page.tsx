@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { ListVideo } from 'lucide-react'
 import TopNav from '@/components/layout/TopNav'
 import Sidebar from '@/components/layout/Sidebar'
@@ -8,25 +7,10 @@ import MobileNav from '@/components/layout/MobileNav'
 import PlaylistCard from '@/components/ui/PlaylistCard'
 import EmptyState from '@/components/ui/EmptyState'
 import { mockVideos } from '@/lib/data/mockVideos'
-
-interface StoredPlaylist {
-  id: string
-  name: string
-  videoIds: string[]
-}
-
-function load(): StoredPlaylist[] {
-  if (typeof window === 'undefined') return []
-  try {
-    const data = localStorage.getItem('playlists')
-    return data ? JSON.parse(data) : []
-  } catch {
-    return []
-  }
-}
+import { usePlaylist } from '@/context/PlaylistContext'
 
 export default function PlaylistsPage() {
-  const [playlists] = useState<StoredPlaylist[]>(() => load())
+  const { playlists } = usePlaylist()
 
   return (
     <div className="min-h-full bg-white dark:bg-black">

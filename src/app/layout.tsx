@@ -4,6 +4,8 @@ import ReduxProvider from "@/components/providers/ReduxProvider";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { WatchLaterProvider } from "@/context/WatchLaterContext";
 import { HistoryProvider } from "@/context/HistoryContext";
+import { LikedProvider } from "@/context/LikedContext";
+import { PlaylistProvider } from "@/context/PlaylistContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -42,9 +44,13 @@ export default function RootLayout({
           <ThemeProvider>
             <WatchLaterProvider>
               <HistoryProvider>
+                <LikedProvider>
+                  <PlaylistProvider>
                 <div id="main-content" className="flex flex-1 flex-col">
                   {children}
                 </div>
+                  </PlaylistProvider>
+                </LikedProvider>
               </HistoryProvider>
             </WatchLaterProvider>
           </ThemeProvider>

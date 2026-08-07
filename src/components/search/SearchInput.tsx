@@ -1,10 +1,11 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Clock, Search, TrendingUp } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { setQuery } from '@/store/slices/searchSlice'
+import { useDebounce } from '@/lib/hooks/useDebounce'
 import { mockVideos } from '@/lib/data/mockVideos'
 
 function recentSearches(): string[] {
@@ -33,7 +34,12 @@ export default function SearchInput({ defaultValue = '' }: { defaultValue?: stri
   const [value, setValue] = useState(defaultValue || query)
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(-1)
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const debouncedValue = useDebounce(value, 300)
+
+  useEffect(() => {
+    const clean = debouncedValue.trim()
+    if (clean !== query) dispatch(setQuery(clean))
+  }, [debouncedValue, dispatch, query])
 
   const recent = recentSearches()
   const trending = Array.from(
@@ -54,11 +60,6 @@ export default function SearchInput({ defaultValue = '' }: { defaultValue?: stri
   function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     setValue(e.target.value)
     setActive(-1)
-    if (timer.current) clearTimeout(timer.current)
-    timer.current = setTimeout(() => {
-      const clean = e.target.value.trim()
-      dispatch(setQuery(clean))
-    }, 300)
   }
 
   function onKeyDown(e: React.KeyboardEvent) {

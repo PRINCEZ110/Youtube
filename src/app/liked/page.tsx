@@ -7,19 +7,10 @@ import VideoCard from '@/components/video/VideoCard'
 import EmptyState from '@/components/ui/EmptyState'
 import { Heart } from 'lucide-react'
 import { mockVideos } from '@/lib/data/mockVideos'
-
-function load(): string[] {
-  if (typeof window === 'undefined') return []
-  try {
-    const data = localStorage.getItem('liked')
-    return data ? JSON.parse(data) : []
-  } catch {
-    return []
-  }
-}
+import { useLiked } from '@/context/LikedContext'
 
 export default function LikedPage() {
-  const liked = load()
+  const { liked } = useLiked()
 
   const videos = liked
     .map((id) => mockVideos.find((v) => v.id === id))
