@@ -6,6 +6,7 @@ import { clearCurrentVideo, setCurrentVideo } from '@/store/slices/videoSlice'
 import VideoPlayer from '@/components/video/VideoPlayer'
 import VideoInfo from '@/components/video/VideoInfo'
 import RelatedVideos from '@/components/video/RelatedVideos'
+import CommentSection from '@/components/video/CommentSection'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 export default function WatchPageClient({ id }: { id: string }) {
@@ -32,6 +33,7 @@ export default function WatchPageClient({ id }: { id: string }) {
       <div className="min-w-0 flex-1">
         <VideoPlayer video={currentVideo} />
         <VideoInfo video={currentVideo} />
+        <CommentSection videoId={currentVideo.id} />
         {relatedVideos.length > 0 && (
           <div className="mt-6 lg:hidden">
             <RelatedVideos />
