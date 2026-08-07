@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect } from 'react'
 import { Play, X } from 'lucide-react'
 import Link from 'next/link'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
@@ -10,15 +9,6 @@ import { SidebarContent } from '@/components/layout/Sidebar'
 export default function MobileNav() {
   const dispatch = useAppDispatch()
   const open = useAppSelector((s) => s.ui.sidebarOpen)
-
-  useEffect(() => {
-    if (!open) return
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') dispatch(toggleSidebar())
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [dispatch, open])
 
   function close() {
     dispatch(toggleSidebar())
@@ -38,17 +28,12 @@ export default function MobileNav() {
         }`}
       />
       <div
-        id="app-sidebar"
         className={`absolute top-0 left-0 flex h-full w-72 flex-col bg-white shadow-xl transition-transform duration-200 dark:bg-zinc-950 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-zinc-200 px-4 dark:border-zinc-800">
-          <Link
-            href="/"
-            onClick={close}
-            className="flex items-center gap-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
-          >
+          <Link href="/" onClick={close} className="flex items-center gap-1">
             <span className="flex h-7 w-9 items-center justify-center rounded-lg bg-red-600">
               <Play size={18} className="fill-white text-white" />
             </span>
@@ -59,7 +44,7 @@ export default function MobileNav() {
           <button
             onClick={close}
             aria-label="Close sidebar"
-            className="rounded-full p-2 text-zinc-700 transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:text-zinc-200 dark:hover:bg-zinc-900"
+            className="rounded-full p-2 text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-900"
           >
             <X size={24} />
           </button>

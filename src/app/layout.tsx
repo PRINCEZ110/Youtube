@@ -32,20 +32,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-full focus:bg-zinc-900 focus:px-4 focus:py-2 focus:text-white"
-        >
-          Skip to content
-        </a>
         <ReduxProvider>
           <ThemeProvider>
             <WatchLaterProvider>
-              <HistoryProvider>
-                <div id="main-content" className="flex flex-1 flex-col">
-                  {children}
-                </div>
-              </HistoryProvider>
+              <HistoryProvider>{children}</HistoryProvider>
             </WatchLaterProvider>
           </ThemeProvider>
         </ReduxProvider>
