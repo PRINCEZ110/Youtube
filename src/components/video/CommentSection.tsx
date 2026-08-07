@@ -36,11 +36,12 @@ export default function CommentSection({ videoId }: { videoId: string }) {
     const comment: Comment = {
       id: `c-${Date.now()}`,
       videoId: videoId,
-      channelName: 'You',
-      channelAvatar: avatarUrl(999),
+      authorName: 'You',
+      authorAvatar: avatarUrl(999),
       text,
       likes: 0,
       timestamp: new Date(),
+      replies: [],
     }
     const next = [comment, ...userComments]
     setUserComments(next)
@@ -83,14 +84,14 @@ export default function CommentSection({ videoId }: { videoId: string }) {
           {comments.map((comment) => (
             <li key={comment.id} className="flex gap-3">
               <ChannelAvatar
-                name={comment.channelName}
-                avatarUrl={comment.channelAvatar}
+                name={comment.authorName}
+                avatarUrl={comment.authorAvatar}
                 size={40}
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 text-sm">
                   <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                    {comment.channelName}
+                    {comment.authorName}
                   </span>
                   <span className="text-zinc-500 dark:text-zinc-400">
                     {timeAgo(comment.timestamp)}

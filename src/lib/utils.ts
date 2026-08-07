@@ -32,3 +32,32 @@ export function timeAgo(date: Date): string {
   if (diffMonth < 12) return `${diffMonth}mo ago`
   return `${diffYear}y ago`
 }
+
+export function formatCompactNumber(n: number): string {
+  if (n < 1_000) return n.toString()
+  if (n < 1_000_000) return `${(n / 1_000).toFixed(1)}K`
+  if (n < 1_000_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+  return `${(n / 1_000_000_000).toFixed(1)}B`
+}
+
+export interface HighlightPart {
+  text: string
+  highlight: boolean
+}
+
+export function highlightMatch(text: string, query: string): HighlightPart[] {
+  const q = query.trim().toLowerCase()
+  if (!q) return [{ text, highlight: false }]
+  const parts: HighlightPart[] = []
+  const lower = text.toLowerCase()
+  let cursor = 0
+  let index = lower.indexOf(q)
+  while (index !== -1) {
+    if (index > cursor) parts.push({ text: text.slice(cursor, index), highlight: false })
+    parts.push({ text: text.slice(index, index + q.length), highlight: true })
+    cursor = index + q.length
+    index = lower.indexOf(q, cursor)
+  }
+  if (cursor < text.length) parts.push({ text: text.slice(cursor), highlight: false })
+  return parts
+}
