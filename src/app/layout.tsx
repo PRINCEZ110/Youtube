@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import ReduxProvider from "@/components/providers/ReduxProvider";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { WatchLaterProvider } from "@/context/WatchLaterContext";
+import { HistoryProvider } from "@/context/HistoryContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,7 +34,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ReduxProvider>
           <ThemeProvider>
-            <WatchLaterProvider>{children}</WatchLaterProvider>
+            <WatchLaterProvider>
+              <HistoryProvider>{children}</HistoryProvider>
+            </WatchLaterProvider>
           </ThemeProvider>
         </ReduxProvider>
       </body>
