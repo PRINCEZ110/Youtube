@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { MoreHorizontal, ThumbsDown, ThumbsUp } from 'lucide-react'
@@ -16,10 +16,10 @@ export default function VideoInfo({ video }: { video: Video }) {
   function toggleLike() {
     if (liked === true) {
       setLiked(null)
-      setLikes(likes - 1)
+      setLikes((n) => n - 1)
     } else {
       setLiked(true)
-      setLikes(likes + 1)
+      setLikes((n) => n + 1)
     }
   }
 
@@ -27,7 +27,7 @@ export default function VideoInfo({ video }: { video: Video }) {
     if (liked === false) {
       setLiked(null)
     } else {
-      if (liked === true) setLikes(likes - 1)
+      if (liked === true) setLikes((n) => n - 1)
       setLiked(false)
     }
   }
@@ -50,11 +50,7 @@ export default function VideoInfo({ video }: { video: Video }) {
         </div>
         <button
           onClick={() => setSubscribed((s) => !s)}
-          className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-            subscribed
-              ? 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800'
-              : 'bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300'
-          }`}
+          className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
         >
           {subscribed ? 'Subscribed' : 'Subscribe'}
         </button>
@@ -65,24 +61,22 @@ export default function VideoInfo({ video }: { video: Video }) {
         <button
           onClick={toggleLike}
           aria-pressed={liked === true}
-          className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-200 dark:hover:bg-zinc-800 ${
             liked === true
-              ? 'bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900'
-              : 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800'
+              ? 'bg-zinc-100 text-blue-600 dark:bg-zinc-900 dark:text-blue-400'
+              : 'bg-zinc-100 text-zinc-800 dark:bg-zinc-900 dark:text-zinc-200'
           }`}
         >
-          <ThumbsUp size={18} fill={liked === true ? 'currentColor' : 'none'} /> {formatViews(likes)}
+          <ThumbsUp size={18} /> {formatViews(likes)}
         </button>
         <button
           onClick={toggleDislike}
           aria-pressed={liked === false}
-          className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-            liked === false
-              ? 'bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900'
-              : 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800'
+          className={`rounded-full bg-zinc-100 p-2 text-zinc-800 transition-colors hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 ${
+            liked === false ? 'text-blue-600 dark:text-blue-400' : ''
           }`}
         >
-          <ThumbsDown size={18} fill={liked === false ? 'currentColor' : 'none'} />
+          <ThumbsDown size={18} />
         </button>
         <button className="flex items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-800 transition-colors hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800">
           Share

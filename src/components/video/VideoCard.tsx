@@ -1,13 +1,23 @@
 'use client'
 
+import { memo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { BadgeCheck } from 'lucide-react'
 import ChannelAvatar from '@/components/ui/ChannelAvatar'
 import WatchLaterButton from '@/components/ui/WatchLaterButton'
 import { formatDuration, formatViews, timeAgo } from '@/lib/utils'
 import type { Video } from '@/lib/data/mockVideos'
 
-export default function VideoCard({ video }: { video: Video }) {
+function VideoCard({
+  video,
+  progress,
+  verified = false,
+}: {
+  video: Video
+  progress?: number
+  verified?: boolean
+}) {
   return (
     <div className="group flex flex-col gap-3">
       <Link
@@ -24,6 +34,14 @@ export default function VideoCard({ video }: { video: Video }) {
         <span className="absolute right-2 bottom-2 rounded bg-black/80 px-1.5 py-0.5 text-xs font-medium text-white">
           {formatDuration(video.duration)}
         </span>
+        {typeof progress === 'number' && (
+          <span className="absolute inset-x-0 bottom-0 h-1 bg-black/40">
+            <span
+              className="block h-full bg-red-600"
+              style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+            />
+          </span>
+        )}
       </Link>
 
       <div className="flex gap-3">
@@ -36,8 +54,9 @@ export default function VideoCard({ video }: { video: Video }) {
             >
               {video.title}
             </Link>
-            <p className="mt-1 truncate text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="mt-1 flex items-center gap-1 truncate text-sm text-zinc-600 dark:text-zinc-400">
               {video.channelName}
+              {verified && <BadgeCheck size={14} className="shrink-0 text-zinc-500 dark:text-zinc-400" />}
             </p>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
               {formatViews(video.views)} · {timeAgo(video.uploadedAt)}
@@ -49,3 +68,5 @@ export default function VideoCard({ video }: { video: Video }) {
     </div>
   )
 }
+
+export default memo(VideoCard)

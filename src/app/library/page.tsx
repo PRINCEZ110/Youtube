@@ -4,6 +4,8 @@ import TopNav from '@/components/layout/TopNav'
 import Sidebar from '@/components/layout/Sidebar'
 import MobileNav from '@/components/layout/MobileNav'
 import VideoCard from '@/components/video/VideoCard'
+import EmptyState from '@/components/ui/EmptyState'
+import { Clock } from 'lucide-react'
 import { useWatchLater } from '@/context/WatchLaterContext'
 import { mockVideos } from '@/lib/data/mockVideos'
 
@@ -29,9 +31,10 @@ export default function LibraryPage() {
           </h1>
 
           {videos.length === 0 ? (
-            <p className="py-24 text-center text-zinc-500">
-              No videos saved. Use the clock icon to save videos to Watch Later.
-            </p>
+            <EmptyState
+              message="No videos saved. Use the clock icon to save videos to Watch Later."
+              icon={Clock}
+            />
           ) : (
             <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {videos.map((video) => (
