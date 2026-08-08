@@ -52,7 +52,10 @@ export default function ShortsPage() {
   }, [])
 
   const sentinelRef = useInfiniteScroll(() => {
-    if (nextPageToken && !loading) void load(nextPageToken)
+    if (nextPageToken && !loading) {
+      setLoading(true)
+      void load(nextPageToken)
+    }
   }, { hasMore: !!nextPageToken && !error, loading })
 
   return (
@@ -100,6 +103,20 @@ export default function ShortsPage() {
             </Link>
           ))}
         </div>
+
+        {loading && (
+          <div className="flex justify-center py-8 text-sm text-zinc-500 dark:text-zinc-400">
+            Loading more shorts…
+          </div>
+        )}
+
+        {!nextPageToken && !loading && items.length > 0 && (
+          <div className="flex items-center justify-center gap-2 py-10 text-sm text-zinc-500 dark:text-zinc-400">
+            <span className="h-1 w-1 rounded-full bg-zinc-400 dark:bg-zinc-600" />
+            <span>You&apos;ve reached the end of Shorts</span>
+            <span className="h-1 w-1 rounded-full bg-zinc-400 dark:bg-zinc-600" />
+          </div>
+        )}
 
         {nextPageToken && !error && (
           <div ref={sentinelRef} className="h-px" />
