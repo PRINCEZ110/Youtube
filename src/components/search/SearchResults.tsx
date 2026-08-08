@@ -1,89 +1,145 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { useAppDispatch } from '@/store/hooks'
-import { setQuery } from '@/store/slices/searchSlice'
-import { mockVideos } from '@/lib/data/mockVideos'
+import { useEffect } from 'react'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import {
+  fetchMoreSearch,
+  fetchSearch,
+  setDuration,
+  setQuery,
+  setSort,
+  type SearchDuration,
+  type SearchSort,
+} from '@/store/slices/searchSlice'
 import VideoCard from '@/components/video/VideoCard'
+import FeedError from '@/components/ui/FeedError'
+import VideoCardSkeleton from '@/components/ui/VideoCardSkeleton'
+import { useInfiniteScroll } from '@/lib/hooks/useInfiniteScroll'
 
-type SortMode = 'relevance' | 'date' | 'views'
+const SORTS: Array<{ id: SearchSort; label: string }> = [
+  { id: 'relevance', label: 'Relevance' },
+  { id: 'date', label: 'Newest' },
+  { id: 'views', label: 'Most viewed' },
+]
 
-function Highlight({ text, query }: { text: string; query: string }) {
-  if (!query) return text
-  const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'))
-  return (
-    <>
-      {parts.map((part, i) =>
-        part.toLowerCase() === query.toLowerCase() ? <mark key={i}>{part}</mark> : part
-      )}
-    </>
-  )
-}
+const DURATIONS: Array<{ id: SearchDuration; label: string }> = [
+  { id: 'any', label: 'Any duration' },
+  { id: 'short', label: 'Under 4 minutes' },
+  { id: 'medium', label: '4–20 minutes' },
+  { id: 'long', label: 'Over 20 minutes' },
+]
 
 export default function SearchResults({ query }: { query: string }) {
   const dispatch = useAppDispatch()
-  const [sort, setSort] = useState<SortMode>('relevance')
+  const { results, status, error, hasMore, loadingMore, totalResults, sort, duration } =
+    useAppSelector((s) => s.search)
 
   useEffect(() => {
     dispatch(setQuery(query))
   }, [dispatch, query])
 
-  const q = query.trim().toLowerCase()
-  const results = useMemo(() => {
-    const filtered = q
-      ? mockVideos.filter(
-          (video) =>
-            video.title.toLowerCase().includes(q) ||
-            video.channelName.toLowerCase().includes(q) ||
-            video.description.toLowerCase().includes(q) ||
-            video.tags.some((tag) => tag.toLowerCase().includes(q))
-        )
-      : mockVideos
+  useEffect(() => {
+    dispatch(fetchSearch({ q: query, sort, duration }))
+  }, [dispatch, query, sort, duration])
 
-    if (sort === 'date') {
-      return [...filtered].sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime())
+  const sentinelRef = useInfiniteScroll(() => {
+    if (!loadingMore && hasMore && status === 'success') {
+      dispatch(fetchMoreSearch())
     }
-    if (sort === 'views') {
-      return [...filtered].sort((a, b) => b.views - a.views)
-    }
-    return filtered
-  }, [q, sort])
+  }, { hasMore: hasMore && status === 'success', loading: loadingMore })
+
+  const trimmed = query.trim()
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {trimmed && status === 'success' && (
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          {q ? `${results.length} result${results.length === 1 ? '' : 's'} for "${query.trim()}"` : `${results.length} videos`}
+          {totalResults !== null
+            ? `${totalResults.toLocaleString()} result${totalResults === 1 ? '' : 's'} for "${trimmed}"`
+            : `Results for "${trimmed}"`}
         </p>
-        <div className="relative">
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortMode)}
-            aria-label="Sort results"
-            className="rounded-full border border-zinc-300 bg-white px-4 py-1.5 text-sm text-zinc-700 outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300"
-          >
-            <option value="relevance">Relevance</option>
-            <option value="date">Date</option>
-            <option value="views">Views</option>
-          </select>
+      )}
+
+      {trimmed && (
+        <div className="flex flex-wrap items-center gap-2">
+          {SORTS.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => dispatch(setSort(item.id))}
+              aria-pressed={sort === item.id}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                sort === item.id
+                  ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
+                  : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
-      </div>
+      )}
+
+      {trimmed && (
+        <div className="flex flex-wrap items-center gap-2">
+          {DURATIONS.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => dispatch(setDuration(item.id))}
+              aria-pressed={duration === item.id}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                duration === item.id
+                  ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
+                  : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {status === 'loading' && results.length === 0 && (
+        <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }, (_, i) => (
+            <VideoCardSkeleton key={i} />
+          ))}
+        </div>
+      )}
+
+      {status === 'error' && (
+        <FeedError
+          error={error!}
+          onRetry={() => dispatch(fetchSearch({ q: trimmed, sort, duration }))}
+        />
+      )}
+
+      {status === 'success' && results.length === 0 && (
+        <div className="py-16 text-center">
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+            No results found
+          </h2>
+          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            Try different keywords or check spelling for &ldquo;{query}&rdquo;.
+          </p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
         {results.map((video) => (
-          <div key={video.id} className="flex flex-col gap-2">
-            <VideoCard video={video} />
-            {q && (
-              <p className="line-clamp-1 text-xs text-zinc-500 dark:text-zinc-400">
-                <Highlight text={video.channelName} query={q} /> · <Highlight text={video.description} query={q} />
-              </p>
-            )}
-          </div>
+          <VideoCard key={video.id} video={video} />
         ))}
       </div>
-      {results.length === 0 && (
-        <p className="py-16 text-center text-zinc-500">
-          No results for &ldquo;{query}&rdquo;.
-        </p>
+
+      {hasMore && (
+        <div ref={sentinelRef} className={`flex justify-center ${loadingMore ? '' : 'h-px'}`}>
+          {loadingMore && (
+            <div className="grid w-full grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 4 }, (_, i) => (
+                <VideoCardSkeleton key={i} />
+              ))}
+            </div>
+          )}
+        </div>
       )}
     </div>
   )

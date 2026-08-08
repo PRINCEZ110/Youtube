@@ -6,7 +6,8 @@ import { Clock, Search, TrendingUp } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { setQuery } from '@/store/slices/searchSlice'
 import { useDebounce } from '@/lib/hooks/useDebounce'
-import { mockVideos } from '@/lib/data/mockVideos'
+
+const TRENDING = ['music', 'gaming', 'technology', 'news', 'lofi']
 
 function recentSearches(): string[] {
   if (typeof window === 'undefined') return []
@@ -42,11 +43,7 @@ export default function SearchInput({ defaultValue = '' }: { defaultValue?: stri
   }, [debouncedValue, dispatch, query])
 
   const recent = recentSearches()
-  const trending = Array.from(
-    new Set(mockVideos.flatMap((v) => v.tags.slice(0, 2)))
-  ).slice(0, 5)
-
-  const suggestions = open ? (recent.length > 0 ? recent : trending) : []
+  const suggestions = open ? (recent.length > 0 ? recent : TRENDING) : []
 
   function go(q: string) {
     const clean = q.trim()

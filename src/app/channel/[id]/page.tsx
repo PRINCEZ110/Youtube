@@ -1,9 +1,36 @@
-import { mockVideos } from '@/lib/data/mockVideos'
+import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import TopNav from '@/components/layout/TopNav'
 import MobileNav from '@/components/layout/MobileNav'
-import ChannelHeader from '@/components/channel/ChannelHeader'
-import ChannelTabs from '@/components/channel/ChannelTabs'
-import ChannelVideos from '@/components/channel/ChannelVideos'
+import ChannelPageClient from './ChannelPageClient'
+import { getChannelById } from '@/lib/youtube/endpoints'
+import { YouTubeApiError } from '@/lib/youtube/client'
+import type { ApiError } from '@/lib/youtube/types'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id } = await params
+  const channel = await getChannelByIdOrNull(id)
+  if (!channel) {
+    return { title: 'Channel not found — YouTube Clone' }
+  }
+  return {
+    title: `${channel.name} — YouTube Clone`,
+    description: channel.description.slice(0, 160),
+  }
+}
+
+async function getChannelByIdOrNull(id: string) {
+  try {
+    return await getChannelById(id)
+  } catch (err) {
+    if (err instanceof YouTubeApiError) return undefined
+    throw err
+  }
+}
 
 export default async function ChannelPage({
   params,
@@ -12,39 +39,26 @@ export default async function ChannelPage({
 }) {
   const { id } = await params
 
-  const channel = mockVideos.find((v) => v.channelId === id)
-  const videos = mockVideos.filter((v) => v.channelId === id)
+  let channel
+  let error: ApiError | null = null
+  try {
+    channel = await getChannelById(id)
+  } catch (err) {
+    error =
+      err instanceof YouTubeApiError
+        ? err.toApiError()
+        : { kind: 'unknown', message: 'Could not load this channel.', retryable: false }
+  }
 
-  if (!channel) {
-    return (
-      <div className="min-h-full bg-white dark:bg-black">
-        <TopNav />
-        <MobileNav />
-        <main className="px-4 py-24 text-center text-zinc-500">
-          Channel not found
-        </main>
-      </div>
-    )
+  if (error?.kind === 'not-found') {
+    notFound()
   }
 
   return (
     <div className="min-h-full bg-white dark:bg-black">
       <TopNav />
       <MobileNav />
-      <main className="mx-auto max-w-5xl px-4 py-6">
-        <ChannelHeader
-          name={channel.channelName}
-          avatarUrl={channel.channelAvatar}
-          subscribers={channel.views * 3}
-          banner={channel.thumbnail}
-        />
-        <div className="mt-4">
-          <ChannelTabs />
-        </div>
-        <div className="mt-6">
-          <ChannelVideos videos={videos} />
-        </div>
-      </main>
+      <ChannelPageClient channel={channel ?? null} initialError={error} />
     </div>
   )
 }

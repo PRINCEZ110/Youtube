@@ -2,60 +2,85 @@
 
 import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { fetchVideos } from '@/store/slices/videoSlice'
-import { mockVideos } from '@/lib/data/mockVideos'
+import { fetchFeed, fetchMoreFeed, resetFeed } from '@/store/slices/videoSlice'
 import VideoCard from '@/components/video/VideoCard'
-import VideoCardSkeleton from '@/components/video/VideoCardSkeleton'
+import SubscribedFeed from '@/components/video/SubscribedFeed'
+import FeedError from '@/components/ui/FeedError'
+import VideoCardSkeleton from '@/components/ui/VideoCardSkeleton'
+import { useFeedPrefs } from '@/context/FeedPrefsContext'
+import type { LocalCategoryId } from '@/lib/youtube/types'
+import { useInfiniteScroll } from '@/lib/hooks/useInfiniteScroll'
 
 export default function VideoGrid() {
   const dispatch = useAppDispatch()
-  const { videos, loading, page } = useAppSelector((s) => s.videos)
+  const { videos, status, error, hasMore, loadingMore } = useAppSelector((s) => s.videos)
   const selectedCategory = useAppSelector((s) => s.ui.selectedCategory)
+  const category = (selectedCategory ?? 'all') as LocalCategoryId
+  const { videos: dismissedVideos, channels: dismissedChannels } = useFeedPrefs()
+
+  const dismissedVideoSet = new Set(dismissedVideos)
+  const dismissedChannelSet = new Set(dismissedChannels)
+  const visibleVideos = videos.filter(
+    (video) =>
+      !dismissedVideoSet.has(video.id) && !dismissedChannelSet.has(video.channelId)
+  )
 
   useEffect(() => {
-    dispatch(fetchVideos(1))
-  }, [dispatch])
+    dispatch(resetFeed())
+    dispatch(fetchFeed(category))
+  }, [dispatch, category])
 
-  const categoryActive = selectedCategory !== null && selectedCategory !== 'all'
-  const visible = categoryActive
-    ? mockVideos.filter((v) => v.categoryId === selectedCategory)
-    : videos
+  const sentinelRef = useInfiniteScroll(() => {
+    if (!loadingMore && hasMore && status === 'success') {
+      dispatch(fetchMoreFeed())
+    }
+  }, { hasMore: hasMore && status === 'success', loading: loadingMore || status === 'loading' })
 
-  if (loading && videos.length === 0) {
+  if ((status === 'loading' || status === 'idle') && videos.length === 0) {
     return (
       <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {Array.from({ length: 8 }, (_, i) => (
+        {Array.from({ length: 12 }, (_, i) => (
           <VideoCardSkeleton key={i} />
         ))}
       </div>
     )
   }
 
-  if (visible.length === 0) {
+  if (status === 'error') {
     return (
-      <p className="py-24 text-center text-zinc-500">
-        No videos found in this category yet.
+      <FeedError
+        error={error!}
+        onRetry={() => dispatch(fetchFeed(category))}
+      />
+    )
+  }
+
+  if (status === 'success' && visibleVideos.length === 0) {
+    return (
+      <p className="py-24 text-center text-zinc-500 dark:text-zinc-400">
+        No videos to show here. Try another category.
       </p>
     )
   }
 
   return (
     <div className="flex flex-col gap-8">
+      {category === 'all' && <SubscribedFeed />}
       <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {visible.map((video) => (
+        {visibleVideos.map((video) => (
           <VideoCard key={video.id} video={video} />
         ))}
       </div>
 
-      {!categoryActive && videos.length < mockVideos.length && (
-        <div className="flex justify-center">
-          <button
-            onClick={() => dispatch(fetchVideos(page + 1))}
-            disabled={loading}
-            className="rounded-full bg-zinc-100 px-6 py-2.5 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-200 disabled:opacity-50 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
-          >
-            {loading ? 'Loading...' : 'Load more'}
-          </button>
+      {hasMore && (
+        <div ref={sentinelRef} className={`flex justify-center ${loadingMore ? '' : 'h-px'}`}>
+          {loadingMore && (
+            <div className="grid w-full grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {Array.from({ length: 4 }, (_, i) => (
+                <VideoCardSkeleton key={i} />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
