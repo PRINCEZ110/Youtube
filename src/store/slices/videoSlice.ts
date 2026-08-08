@@ -1,79 +1,113 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import { mockVideos, type Video } from '@/lib/data/mockVideos'
-import { fetchVideos as fetchVideosApi } from '@/lib/services/mockApi'
-import type { RootState } from '@/store/index'
+import type { ApiError, LocalCategoryId, PageResponse, Video } from '@/lib/youtube/types'
 
-const PAGE_SIZE = 12
-
-interface VideoState {
+interface VideoFeedState {
   videos: Video[]
-  currentVideo: Video | null
-  relatedVideos: Video[]
-  loading: boolean
+  nextPageToken: string | null
   hasMore: boolean
-  page: number
+  status: 'idle' | 'loading' | 'success' | 'error'
+  error: ApiError | null
+  loadingMore: boolean
+  category: LocalCategoryId
 }
 
-const initialState: VideoState = {
+const initialState: VideoFeedState = {
   videos: [],
-  currentVideo: null,
-  relatedVideos: [],
-  loading: false,
+  nextPageToken: null,
   hasMore: false,
-  page: 1,
+  status: 'idle',
+  error: null,
+  loadingMore: false,
+  category: 'all',
 }
 
-export const fetchVideos = createAsyncThunk('videos/fetchVideos', async (page: number, api) => {
-  const categoryId = (api.getState() as RootState).ui.selectedCategory ?? undefined
-  return fetchVideosApi({ page, pageSize: PAGE_SIZE, categoryId })
-})
+export const fetchFeed = createAsyncThunk(
+  'videos/fetchFeed',
+  async (category: LocalCategoryId): Promise<PageResponse<Video>> => {
+    const res = await fetch(
+      `/api/youtube/videos?mode=popular&category=${encodeURIComponent(category)}`
+    )
+    const body = (await res.json()) as { ok: boolean; data?: PageResponse<Video>; error?: ApiError }
+    if (!body.ok || !body.data) throw new ThunkApiError(body.error)
+    return body.data
+  }
+)
+
+export const fetchMoreFeed = createAsyncThunk(
+  'videos/fetchMoreFeed',
+  async (_, api): Promise<PageResponse<Video>> => {
+    const state = (api.getState() as { videos: VideoFeedState }).videos
+    if (!state.nextPageToken) throw new Error('No more pages')
+    const res = await fetch(
+      `/api/youtube/videos?mode=popular&category=${encodeURIComponent(state.category)}&pageToken=${encodeURIComponent(state.nextPageToken)}`
+    )
+    const body = (await res.json()) as { ok: boolean; data?: PageResponse<Video>; error?: ApiError }
+    if (!body.ok || !body.data) throw new ThunkApiError(body.error)
+    return body.data
+  }
+)
+
+class ThunkApiError extends Error {
+  readonly apiError: ApiError
+  constructor(apiError: ApiError | undefined) {
+    super(apiError?.message ?? 'Feed request failed')
+    this.apiError = apiError ?? { kind: 'unknown', message: 'Feed request failed', retryable: false }
+  }
+}
 
 const videoSlice = createSlice({
   name: 'videos',
   initialState,
   reducers: {
-    setCurrentVideo: (state, action: PayloadAction<string>) => {
-      state.currentVideo = mockVideos.find((video) => video.id === action.payload) ?? null
-      if (state.currentVideo) {
-        const { categoryId, tags } = state.currentVideo
-        state.relatedVideos = mockVideos
-          .filter(
-            (video) =>
-              video.id !== state.currentVideo?.id &&
-              (video.categoryId === categoryId || video.tags.some((tag) => tags.includes(tag)))
-          )
-          .slice(0, 8)
-      } else {
-        state.relatedVideos = []
-      }
-    },
-    clearCurrentVideo: (state) => {
-      state.currentVideo = null
-      state.relatedVideos = []
-    },
-    resetVideos: (state) => {
+    resetFeed: (state) => {
       state.videos = []
-      state.page = 1
+      state.nextPageToken = null
       state.hasMore = false
+      state.status = 'idle'
+      state.error = null
+    },
+    setFeedCategory: (state, action: PayloadAction<LocalCategoryId>) => {
+      state.category = action.payload
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchVideos.pending, (state) => {
-        state.loading = true
+      .addCase(fetchFeed.pending, (state) => {
+        state.status = 'loading'
+        state.error = null
       })
-      .addCase(fetchVideos.fulfilled, (state, action) => {
-        state.loading = false
-        state.page = action.meta.arg
-        state.hasMore = action.payload.length === PAGE_SIZE
-        state.videos = action.meta.arg === 1 ? action.payload : [...state.videos, ...action.payload]
+      .addCase(fetchFeed.fulfilled, (state, action) => {
+        state.status = 'success'
+        state.videos = action.payload.items
+        state.nextPageToken = action.payload.nextPageToken
+        state.hasMore = !!action.payload.nextPageToken
+        state.error = null
       })
-      .addCase(fetchVideos.rejected, (state) => {
-        state.loading = false
-        state.hasMore = false
+      .addCase(fetchFeed.rejected, (state, action) => {
+        state.status = 'error'
+        state.error =
+          action.payload instanceof ThunkApiError
+            ? action.payload.apiError
+            : { kind: 'unknown', message: action.error.message ?? 'Feed request failed', retryable: true }
+      })
+      .addCase(fetchMoreFeed.pending, (state) => {
+        state.loadingMore = true
+      })
+      .addCase(fetchMoreFeed.fulfilled, (state, action) => {
+        state.loadingMore = false
+        const existing = new Set(state.videos.map((v) => v.id))
+        state.videos = [
+          ...state.videos,
+          ...action.payload.items.filter((v) => !existing.has(v.id)),
+        ]
+        state.nextPageToken = action.payload.nextPageToken
+        state.hasMore = !!action.payload.nextPageToken
+      })
+      .addCase(fetchMoreFeed.rejected, (state) => {
+        state.loadingMore = false
       })
   },
 })
 
-export const { setCurrentVideo, clearCurrentVideo, resetVideos } = videoSlice.actions
+export const { resetFeed, setFeedCategory } = videoSlice.actions
 export default videoSlice.reducer

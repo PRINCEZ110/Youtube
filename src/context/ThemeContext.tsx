@@ -18,14 +18,14 @@ function getSystemTheme(): Theme {
 
 function getStoredTheme(): Theme | null {
   if (typeof window === 'undefined') return null
-  const stored = localStorage.getItem('theme')
+  const stored = localStorage.getItem('yt-theme')
   if (stored === 'light' || stored === 'dark') return stored
   return null
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === 'undefined') return 'light'
+    if (typeof window === 'undefined') return 'dark'
     return getStoredTheme() ?? getSystemTheme()
   })
 
