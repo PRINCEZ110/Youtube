@@ -1,6 +1,6 @@
 'use client'
 
-import { Bookmark, History, Home, ThumbsUp } from 'lucide-react'
+import { Bookmark, History, Home, ListVideo, ThumbsUp } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { setSelectedCategory } from '@/store/slices/uiSlice'
@@ -14,7 +14,8 @@ interface NavItem {
 const YOU: NavItem[] = [
   { href: '/history', label: 'History', Icon: History },
   { href: '/library', label: 'Watch later', Icon: Bookmark },
-  { href: '/library', label: 'Liked videos', Icon: ThumbsUp },
+  { href: '/liked', label: 'Liked videos', Icon: ThumbsUp },
+  { href: '/playlists', label: 'Playlists', Icon: ListVideo },
 ]
 
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {

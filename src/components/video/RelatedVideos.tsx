@@ -14,7 +14,7 @@ export default function RelatedVideos({ videos }: { videos: Video[] }) {
         <Link
           key={video.id}
           href={`/watch/${video.id}`}
-          className="group flex gap-3"
+          className="group flex gap-3 rounded-xl p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-900"
         >
           <div className="relative aspect-video w-40 shrink-0 overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800">
             {video.thumbnail && (
