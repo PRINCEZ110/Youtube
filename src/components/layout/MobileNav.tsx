@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect } from 'react'
-import { Play, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import Link from 'next/link'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { toggleSidebar } from '@/store/slices/uiSlice'
 import { SidebarContent } from '@/components/layout/Sidebar'
+import YoutubeIcon from '@/components/ui/YoutubeIcon'
 
 export default function MobileNav() {
   const dispatch = useAppDispatch()
@@ -49,8 +50,8 @@ export default function MobileNav() {
             onClick={close}
             className="flex items-center gap-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
           >
-            <span className="flex h-7 w-9 items-center justify-center rounded-lg bg-red-600">
-              <Play size={18} className="fill-white text-white" />
+            <span className="flex h-7 w-9 items-center justify-center">
+              <YoutubeIcon size={22} />
             </span>
             <span className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-white">
               YouTube
