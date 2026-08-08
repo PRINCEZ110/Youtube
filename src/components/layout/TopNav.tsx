@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Menu, Moon, Play, Search, Sun } from 'lucide-react'
+import { Bell, Menu, Moon, Play, PlusSquare, Search, Sun, User } from 'lucide-react'
 import { useTheme } from '@/context/ThemeContext'
 import { useAppDispatch } from '@/store/hooks'
 import { toggleSidebar } from '@/store/slices/uiSlice'
@@ -10,6 +10,8 @@ import SearchInput from '@/components/search/SearchInput'
 export default function TopNav() {
   const { theme, toggle } = useTheme()
   const dispatch = useAppDispatch()
+
+  function noop() {}
 
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-zinc-200 bg-white px-4 dark:border-zinc-800 dark:bg-black">
@@ -42,6 +44,28 @@ export default function TopNav() {
         >
           <Search size={24} />
         </Link>
+        <button
+          onClick={noop}
+          aria-label="Create"
+          className="hidden rounded-full p-2 text-zinc-700 transition-colors hover:bg-zinc-100 md:block dark:text-zinc-200 dark:hover:bg-zinc-900"
+        >
+          <PlusSquare size={24} />
+        </button>
+        <button
+          onClick={noop}
+          aria-label="Notifications"
+          className="relative hidden rounded-full p-2 text-zinc-700 transition-colors hover:bg-zinc-100 sm:block dark:text-zinc-200 dark:hover:bg-zinc-900"
+        >
+          <Bell size={24} />
+          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-600" />
+        </button>
+        <button
+          onClick={noop}
+          aria-label="Profile"
+          className="ml-1 hidden h-9 w-9 items-center justify-center rounded-full bg-zinc-200 text-zinc-600 transition-colors hover:bg-zinc-300 sm:flex dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+        >
+          <User size={20} />
+        </button>
         <button
           onClick={toggle}
           aria-label="Toggle theme"

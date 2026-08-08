@@ -1,61 +1,69 @@
 'use client'
 
-import {
-  Clapperboard,
-  Gamepad2,
-  GraduationCap,
-  Home,
-  Monitor,
-  Music,
-  Newspaper,
-  Trophy,
-} from 'lucide-react'
-import { categories } from '@/lib/data/mockCategories'
+import { Bookmark, History, Home, ThumbsUp } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { setSelectedCategory } from '@/store/slices/uiSlice'
 
-const ICONS = {
-  Home,
-  Music,
-  Gamepad2,
-  Newspaper,
-  Trophy,
-  GraduationCap,
-  Clapperboard,
-  Monitor,
-} as const
+interface NavItem {
+  href: string
+  label: string
+  Icon: typeof Home
+}
+
+const YOU: NavItem[] = [
+  { href: '/history', label: 'History', Icon: History },
+  { href: '/library', label: 'Watch later', Icon: Bookmark },
+  { href: '/library', label: 'Liked videos', Icon: ThumbsUp },
+]
 
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const dispatch = useAppDispatch()
   const selectedCategory = useAppSelector((s) => s.ui.selectedCategory)
+  const router = useRouter()
+  const pathname = usePathname()
 
-  function select(id: string) {
-    dispatch(setSelectedCategory(id === 'all' ? null : id))
+  function goHome() {
+    dispatch(setSelectedCategory(null))
     onNavigate?.()
+    if (pathname !== '/') {
+      router.push('/')
+    }
+  }
+
+  function nav(href: string) {
+    onNavigate?.()
+    router.push(href)
+  }
+
+  function itemClass(active: boolean) {
+    return `flex items-center gap-5 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+      active
+        ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100'
+        : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900'
+    }`
   }
 
   return (
     <nav className="flex flex-col gap-1 overflow-y-auto px-3 py-4">
-      {categories.map((category) => {
-        const Icon = ICONS[category.icon as keyof typeof ICONS] ?? Home
-        const active = selectedCategory === null
-          ? category.id === 'all'
-          : selectedCategory === category.id
-        return (
-          <button
-            key={category.id}
-            onClick={() => select(category.id)}
-            className={`flex items-center gap-5 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-              active
-                ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100'
-                : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900'
-            }`}
-          >
-            <Icon size={22} />
-            <span className="truncate">{category.name}</span>
-          </button>
-        )
-      })}
+      <button onClick={goHome} className={itemClass(selectedCategory === null && pathname === '/')}>
+        <Home size={22} />
+        <span className="truncate">Home</span>
+      </button>
+
+      <p className="mt-4 mb-1 px-3 text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
+        You
+      </p>
+      {YOU.map(({ href, label, Icon }) => (
+        <button
+          key={`${href}-${label}`}
+          onClick={() => nav(href)}
+          className={itemClass(pathname.startsWith(href))}
+        >
+          <Icon size={22} />
+          <span className="truncate">{label}</span>
+        </button>
+      ))}
     </nav>
   )
 }

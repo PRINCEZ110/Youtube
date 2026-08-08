@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
 
 const COLORS = [
   'bg-red-500',
@@ -29,38 +31,56 @@ export default function ChannelAvatar({
   name,
   avatarUrl,
   size = 40,
+  channelId,
 }: {
   name: string
   avatarUrl?: string
   size?: number
+  channelId?: string
 }) {
   const [failed, setFailed] = useState(false)
   const showImage = !!avatarUrl && !failed
+  const fallbackColor = colorFor(name || '?')
+
+  const inner = showImage ? (
+    <Image
+      src={avatarUrl!}
+      alt={name}
+      fill
+      sizes={`${size * 2}px`}
+      className="object-cover"
+      onError={() => setFailed(true)}
+    />
+  ) : (
+    <span
+      className="flex h-full w-full items-center justify-center font-medium text-white select-none"
+      style={{ fontSize: size * 0.45 }}
+    >
+      {name.charAt(0).toUpperCase()}
+    </span>
+  )
+
+  const className = `relative flex shrink-0 items-center justify-center overflow-hidden rounded-full ${
+    showImage ? '' : fallbackColor
+  }`
+  const style = { width: size, height: size }
+
+  if (channelId) {
+    return (
+      <Link
+        href={`/channel/${channelId}`}
+        aria-label={`${name} channel`}
+        className={`${className} transition-opacity hover:opacity-80`}
+        style={style}
+      >
+        {inner}
+      </Link>
+    )
+  }
 
   return (
-    <div
-      className={`flex items-center justify-center rounded-full overflow-hidden ${
-        showImage ? '' : colorFor(name)
-      }`}
-      style={{ width: size, height: size }}
-    >
-      {showImage ? (
-        <img
-          src={avatarUrl}
-          alt={name}
-          width={size}
-          height={size}
-          className="object-cover"
-          onError={() => setFailed(true)}
-        />
-      ) : (
-        <span
-          className="text-white font-medium select-none"
-          style={{ fontSize: size * 0.45 }}
-        >
-          {name.charAt(0).toUpperCase()}
-        </span>
-      )}
+    <div className={className} style={style}>
+      {inner}
     </div>
   )
 }

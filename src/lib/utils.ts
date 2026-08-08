@@ -13,9 +13,11 @@ export function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`
 }
 
-export function timeAgo(date: Date): string {
+export function timeAgo(date: string | Date): string {
+  const parsed = typeof date === 'string' ? new Date(date) : date
+  if (Number.isNaN(parsed.getTime())) return ''
   const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
+  const diffMs = now.getTime() - parsed.getTime()
   const diffSec = Math.floor(diffMs / 1000)
   const diffMin = Math.floor(diffSec / 60)
   const diffHour = Math.floor(diffMin / 60)
