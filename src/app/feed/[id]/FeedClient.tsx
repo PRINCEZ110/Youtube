@@ -144,6 +144,14 @@ export default function FeedClient({ id }: { id: string }) {
       )}
 
       {page?.nextPageToken && !loadError && <div ref={sentinelRef} className="h-px" />}
+
+      {page && !page.nextPageToken && page.videos.length > 0 && (
+        <div className="flex items-center justify-center gap-2 py-10 text-sm text-zinc-500 dark:text-zinc-400">
+          <span className="h-1 w-1 rounded-full bg-zinc-400 dark:bg-zinc-600" />
+          <span>No more videos</span>
+          <span className="h-1 w-1 rounded-full bg-zinc-400 dark:bg-zinc-600" />
+        </div>
+      )}
     </div>
   )
 }

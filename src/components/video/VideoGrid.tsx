@@ -89,6 +89,14 @@ export default function VideoGrid() {
           )}
         </div>
       )}
+
+      {!hasMore && (
+        <div className="flex items-center justify-center gap-2 py-10 text-sm text-zinc-500 dark:text-zinc-400">
+          <span className="h-1 w-1 rounded-full bg-zinc-400 dark:bg-zinc-600" />
+          <span>You&apos;ve reached the end of the feed</span>
+          <span className="h-1 w-1 rounded-full bg-zinc-400 dark:bg-zinc-600" />
+        </div>
+      )}
     </div>
   )
 }
