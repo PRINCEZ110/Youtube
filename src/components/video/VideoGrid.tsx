@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { fetchFeed, fetchMoreFeed, resetFeed } from '@/store/slices/videoSlice'
 import VideoCard from '@/components/video/VideoCard'
 import SubscribedFeed from '@/components/video/SubscribedFeed'
+import ShortsSection from '@/components/video/ShortsSection'
 import FeedError from '@/components/ui/FeedError'
 import VideoCardSkeleton from '@/components/ui/VideoCardSkeleton'
 import { useFeedPrefs } from '@/context/FeedPrefsContext'
@@ -38,7 +39,7 @@ export default function VideoGrid() {
 
   if ((status === 'loading' || status === 'idle') && videos.length === 0) {
     return (
-      <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {Array.from({ length: 12 }, (_, i) => (
           <VideoCardSkeleton key={i} />
         ))}
@@ -65,8 +66,13 @@ export default function VideoGrid() {
 
   return (
     <div className="flex flex-col gap-8">
-      {category === 'all' && <SubscribedFeed />}
-      <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {category === 'all' && (
+        <>
+          <SubscribedFeed />
+          <ShortsSection />
+        </>
+      )}
+      <div className="grid grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {visibleVideos.map((video) => (
           <VideoCard key={video.id} video={video} />
         ))}
@@ -75,7 +81,7 @@ export default function VideoGrid() {
       {hasMore && (
         <div ref={sentinelRef} className={`flex justify-center ${loadingMore ? '' : 'h-px'}`}>
           {loadingMore && (
-            <div className="grid w-full grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid w-full grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {Array.from({ length: 4 }, (_, i) => (
                 <VideoCardSkeleton key={i} />
               ))}

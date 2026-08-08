@@ -79,13 +79,13 @@ function VideoSection({ title, icon, ids, emptyText }: VideoSectionProps) {
       </h2>
       {error && <FeedError error={error} compact />}
       {loading && videos.length === 0 ? (
-        <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {Array.from({ length: 3 }, (_, i) => (
             <VideoCardSkeleton key={i} />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {ids
             .map((id) => videos.find((v) => v.id === id))
             .filter((v): v is Video => !!v)
