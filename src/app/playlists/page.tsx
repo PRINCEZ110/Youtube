@@ -57,7 +57,7 @@ export default function PlaylistsPage() {
           </h1>
 
           {playlists.length > 0 && covers.size === 0 && !error && (
-            <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {Array.from({ length: Math.min(3, playlists.length) }, (_, i) => (
                 <VideoCardSkeleton key={i} />
               ))}
@@ -69,7 +69,7 @@ export default function PlaylistsPage() {
           {playlists.length === 0 ? (
             <EmptyState message="No playlists yet." icon={ListVideo} />
           ) : (
-            <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {playlists.map((playlist) => (
                 <PlaylistCard
                   key={playlist.id}
