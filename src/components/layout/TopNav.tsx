@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { Menu, Mic, Moon, Play, PlusSquare, Search, Sun } from 'lucide-react'
+import { Menu, Mic, Moon, PlusSquare, Search, Sun } from 'lucide-react'
 import { useTheme } from '@/context/ThemeContext'
 import { useAppDispatch } from '@/store/hooks'
 import { toggleSidebar } from '@/store/slices/uiSlice'
 import SearchInput from '@/components/search/SearchInput'
+import YoutubeIcon from '@/components/ui/YoutubeIcon'
 import NotificationsMenu from '@/components/layout/NotificationsMenu'
 
 export default function TopNav() {
@@ -25,8 +26,8 @@ export default function TopNav() {
       </button>
 
       <Link href="/" className="flex shrink-0 items-center gap-1">
-        <span className="flex h-7 w-9 items-center justify-center rounded-lg bg-red-600">
-          <Play size={18} className="fill-white text-white" />
+        <span className="flex h-7 w-9 items-center justify-center">
+          <YoutubeIcon size={22} />
         </span>
         <span className="hidden text-xl font-semibold tracking-tight text-zinc-900 sm:inline dark:text-white">
           YouTube
